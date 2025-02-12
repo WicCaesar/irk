@@ -227,19 +227,15 @@ Usage: MODE #Channel +i -> INVITE name #Channel */
 std::string	Server::invite_only(Channel *channel, char binary, std::string mode_list) {
 	std::string	param;
 	param.clear();
-	std::cout << "APAGAR Chegou no invite_only." << std::endl;
 	if (binary == '+' && !channel->get_mode_at_index(3)) {
 		channel->set_mode_at_index(3, true);
 		channel->lock(true);
 		param = append_mode(mode_list, binary, 'i');
-		std::cout << "APAGAR Entrou no if do invite_only." << std::endl;
 	} else if (binary == '-' && channel->get_mode_at_index(3)) {
 		channel->set_mode_at_index(3, false);
 		channel->lock(false);
 		param = append_mode(mode_list, binary, 'i');
-		std::cout << "APAGAR Entrou no else do invite_only." << std::endl;
 	};
-	std::cout << "APAGAR Passou pelo invite_only e vai retornar." << std::endl;
 	return (param);
 };
 

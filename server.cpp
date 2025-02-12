@@ -103,9 +103,7 @@ bool	Server::signal_ = false;
 
 void Server::antenna(int signal) {
 	(void)signal;
-	//! APAGAR ABAIXO OU TROCAR POR EMOJI OU OUTRA COISA
 	std::cout << "\nSinal recebido!" << std::endl;
-	//! APAGAR ACIMA OU TROCAR POR EMOJI OU OUTRA COISA
 	Server::signal_ = true;
 };
 
@@ -118,9 +116,9 @@ void	Server::start(int port, std::string password) {
 	while (Server::signal_ == false) {
 		//TODO STUDY POLL, HOW IT'S DIFFERENT FROM EPOLL, HOW IT LINKS TO THE SOCKET, 0_NONBLOCKING.
 		// If the poll call fails and no signal is received, throws an exception.
-		if ((poll(&fd_list_[0], fd_list_.size(), -1) == -1) 
+		if ((poll(&fd_list_[0], fd_list_.size(), -1) == -1)
 			&& Server::signal_ == false)
-			throw(std::runtime_error("Falha no poll.")); //! CHANGE THIS MESSAGE.
+			throw(std::runtime_error("Falha no poll.")); // To force this error, hit Ctrl+Z.
 		for (size_t i = 0; i < fd_list_.size(); i++) {
 			// What to do if there's incoming data to read on the socket?
 			if (fd_list_[i].revents && POLLIN) {
@@ -154,11 +152,8 @@ void	Server::close_fd(void) {
 
 // Adjusts the IRC server socket.
 void	Server::socket_setup(void) {
-	//! REMOVE OR KEEP THE ADDRESS BELOW? I THINK I SHOULD'VE USED THE ADDRESS OF THE CLASS ITSELF.
-	// struct sockaddr_in address;
-	//TODO INSTEAD OF THIS NEW ADDRESS, I THINK IT SHOULD BE this->server_address_ - TEST IT.
-
-	int enable = TRUE; // Enables options for setsockopt (SO_REUSEADDR, O_NONBLOCK).
+	int enable = TRUE; // I'll use it to enable options for setsockopt (SO_REUSEADDR, O_NONBLOCK).
+	//! Never change this to boolean, as apparently setsockopt can't handle it.
 	this->server_address_.sin_family = AF_INET; // Sets the address to IPv4 (AF_INET6 for IPv6).
 	this->server_address_.sin_port = htons(port_);
 	/* In the sockaddr_in struct, the sin_port stores a 16-bit integer, big endian.
@@ -167,22 +162,27 @@ void	Server::socket_setup(void) {
 	/* in_addr typically has a single member, representing the IPv4 address.
 	INADDR_ANY represents “any” IP address, meaning the socket will be bound to
 	all available network interfaces on the host. */
-	socket_ = socket(AF_INET, SOCK_STREAM, 0); // Creates the server socket.
+	
+	/* Creates the server socket (which is really a file descriptor with value 3). 
+	The previous are stdin (0), stdout (1) and stderr (2). */
+	socket_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_ == -1)
 		throw(std::runtime_error("Falha ao criar o soquete."));
-	// SOL_SOCKET is the socket level (manipulates options at the socket level)
+	// SOL_SOCKET is the socket level (manipulates options at the socket level, independent of protocol).
 	// SO_REUSEADDR allows reusing the socket immediately after it is closed.
 	if (setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1)
 		throw(std::runtime_error("Falha no SO_REUSEADDR do soquete."));
 	// F_SETFL sets the file status flags to the value of its third argument.
 	// O_NONBLOCK means means it doesn't wait for data to be read.
+	//! It's the only form allowed by the subject; any other flag's forbidden.
 	if (fcntl(socket_, F_SETFL, O_NONBLOCK) == -1)
 		throw(std::runtime_error("Falha no O_NONBLOCK do soquete."));
 	// Binds the socket to the address and port.
 	if (bind(socket_, (struct sockaddr *)&this->server_address_, sizeof(this->server_address_)) == -1)
 		throw(std::runtime_error("Falha ao vincular o soquete."));
 	// Listens for incoming connections, turning into a passive socket (create, bind, listen, accept).
-	// SOMAXCONN is the maximum of pending connections that can be queued.
+	/* SOMAXCONN is the maximum of pending connections that can be queued.
+	Setting it to -1 allows the system to choose its maximum capacity. */
 	if (listen(socket_, SOMAXCONN) == -1)
 		throw(std::runtime_error("Falha na escuta."));
 
@@ -201,12 +201,12 @@ void	Server::welcome_client(void) {
 	memset(&this->client_address_, 0, sizeof(this->client_address_)); // Clears the client address structure.
 	socklen_t length = sizeof(this->client_address_);
 	int incoming_fd = accept(socket_, (sockaddr *)&(this->client_address_), &length); // Accepts a new connection.
-	if (incoming_fd == -1) {
-		std::cerr << "Falha ao aceitar a conexão." << std::endl; // If accept fails, prints an error message.
+	if (incoming_fd == -1) { // If accept fails, prints an error message.
+		std::cerr << "Falha ao aceitar a conexão." << std::endl;
 		return ;
-	};
+	}; // If O_NONBLOCK fails, prints an error message.
 	if (fcntl(incoming_fd, F_SETFL, O_NONBLOCK) == -1) {
-		std::cerr << "Falha ao configurar o O_NONBLOCK." << std::endl; // If O_NONBLOCK fails, prints an error message.
+		std::cerr << "Falha ao configurar o O_NONBLOCK." << std::endl;
 		return ;
 	};
 
@@ -217,7 +217,7 @@ void	Server::welcome_client(void) {
 	client.set_ip(inet_ntoa((this->client_address_.sin_addr))); // Converts the client's IP address to string.
 	client_list_.push_back(client);
 	fd_list_.push_back(this->newclient_);
-	std::cout << "Cliente " << incoming_fd << " conectado." << std::endl; //! APAGAR OU É NECESSÁRIO? DEIXAR PARA TESTAR
+	std::cout << "Cliente " << incoming_fd << " conectado." << std::endl;
 };
 
 // Receives new data from a client that is already registered.
@@ -228,14 +228,14 @@ void	Server::welcome_data(int fd) {
 	Client *client = get_client_by_fd(fd); // Gets the respective client of this fd.
 	// Receives data from the client and stores it in the buffer.
 	ssize_t bytes = recv(fd, buffer, sizeof(buffer) -1, 0); // -1 space for the NULL terminator.
-	if (bytes <= 0) { // If there's no data to read or an error occurred.
-		std::cout << "Cliente " << fd << " desconectado." << std::endl; // Prints a message indicating the client disconnected.
-		remove_from_all_channels(fd);	// Removes the client from all channels,
+	if (bytes <= 0) { // If there's no data to read or an error occurred, 
+		std::cout << "Cliente " << fd << " desconectado." << std::endl; // informs the user,
+		remove_from_all_channels(fd);	// removes the client from all channels,
 		remove_client_from_list(fd); 	// from the client list,
 		remove_fd_from_list(fd); 		// from the fd list,
-		close(fd); 					// and closes the client's socket.
+		close(fd); 						// and closes the client's socket.
 	} else { // If no problems occurred, prints the received data.
-		client->set_buffer(buffer); // Sets the client's buffer.
+		client->set_buffer(buffer);
 		// If the client's buffer doesn't contain a newline character, returns.
 		if (client->get_buffer().find_first_of("\r\n") == std::string::npos)
 			return ;
@@ -282,24 +282,23 @@ void	Server::remove_channel_from_list(std::string name) {
 void	Server::remove_from_all_channels(int fd) {
 	for (size_t i = 0; i < this->channel_list_.size(); i++) {
 		bool someone_removed = false;
-		// If this client is in the channel, removes it.
+		// Whether it's just a member
 		if (channel_list_[i].get_client_by_fd(fd)) {
 			channel_list_[i].remove_client(fd);
 			someone_removed = true;
-		// If this client is an admin of the channel, removes it.
-		//TODO TEST IF THE LOGIC IS IN RIGHT ORDER.
+		// or an operator, removes them from the channel.
 		} else if (channel_list_[i].get_admin_by_fd(fd)) {
 			channel_list_[i].remove_admin(fd);
 			someone_removed = true;
 		};
-		// If the channel has no more clients, removes the channel entirely.
-		//TODO TEST.
+		// If the channel has no more members, close the channel entirely.
+		//TODO TEST. CREATE A CHANNEL, REMOVE THE CLIENT AND TRY TO SEND A PRIVMSG FOR THE CHANNEL.
 		if (channel_list_[i].get_population() == 0) {
 			channel_list_.erase(channel_list_.begin() + i);
 			i--;
 			continue;
 		};
-		// If the client was removed from the channel, sends a message to the channel.
+		// If any member's been removed from the channel, informs other members.
 		if (someone_removed == true) {
 			std::string response = ":" + get_client_by_fd(fd)->get_displayname() + "!~" \
 				+ get_client_by_fd(fd)->get_login() + "@localhost QUIT Quit\r\n";
@@ -352,7 +351,7 @@ void	Server::execute_command(std::string &command, int fd) {
 			return ; // bong is a ping equivalent.
 		if (queue[0] == "USER" || queue[0] == "/bong")
 			this->set_login(command, fd); // Changes the login ID (for access).
-			//TODO TENTAR SEM THIS->
+			//TODO TRY WITHOUT "THIS->".
 		else if (queue[0] == "PASS" || queue[0] == "/pass" \
 				|| queue[0] == "AUTHENTICATE" || queue[0] == "/authenticate")
 			authenticate(command, fd); // Authenticates the client.
@@ -428,17 +427,16 @@ void	Server::set_login(std::string &login, int fd) {
 		respond(ERR_NEEDMOREPARAMS(client->get_displayname()), fd);
 		return ;
 	};
-	if (!client || client->isregistered() == FALSE) {
+	if (!client || client->isregistered() == false) {
 		respond(ERR_NOTREGISTERED(std::string("*")), fd);
-		return ; //! RETURN OR NOT? I'M GUESSING NOT.
-	} else if (client && client->get_login().empty() == FALSE) {
+		// return ; //! RETURN OR NOT? I'M GUESSING NOT.
+	} else if (client && !client->get_login().empty()) {
 		respond(ERR_ALREADYREGISTRED(client->get_displayname()), fd);
 		return ;
 	} else
 		client->set_login(shards[1]);
 
-	/* If client exists, is registered with valid login ID and display name, 
-	but online status is set to false, changes it to true and sends response. */
+	/* When registration is complete, welcomes the new client. */
 	if (client && client->isregistered() && !client->get_login().empty() 
 	&& !client->get_displayname().empty() && client->get_displayname() != "*" 
 	&& !client->isonline())	{
@@ -455,7 +453,6 @@ void	Server::set_displayname(std::string new_displayname, int fd) {
 		new_displayname = new_displayname.substr(beginning); // Removes whitespace characters.
 		if (new_displayname[0] == ':') // Removes ':'.
 			new_displayname.erase(new_displayname.begin());
-		//TODO TESTAR SE NÃO POSSO SIMPLESMENTE ADICIONAR : NO FIND FIRST NOT OF ": \t\v" E CORTAR AS DUAS LINHAS ACIMA???
 	};
 	Client	*client = get_client_by_fd(fd);
 	// Throws error if it's empty or if there's only whitespace characters.
@@ -474,7 +471,7 @@ void	Server::set_displayname(std::string new_displayname, int fd) {
 	};
 	// If desired display name contains invalid characters, sends error message.
 	// Valid characters are alphanumeric and underscore.
-	if (isnamevalid(new_displayname) == FALSE) {
+	if (isnamevalid(new_displayname) == false) {
 		respond(ERR_ERRONEUSNICKNAME(new_displayname), fd);
 		return ;
 	} else {
@@ -489,11 +486,12 @@ void	Server::set_displayname(std::string new_displayname, int fd) {
 					// connects the client and sends a reply with the new name.
 					client->set_online_status(true);
 					respond(RPL_WELCOME(client->get_displayname()), fd);
-//TODO OUTRO TESTE, O COMANDO ABAIXO EU PUS DENTRO DO IF, E TEM UM ELSE QUE, EM TESE, FARIA A MESMA COISA, PORÉM EXIBINO O NOME ANTIGO. PEDIR AJUDA.
+					//TODO TEST IF IT WOULD SEEM REDUNDANT ADDING RPL_NAMECHANGE INSIDE THIS CONDITION (WITH THE NEW NAME).
 				};
 				respond(RPL_NAMECHANGE(old_name, client->get_displayname()), fd);
+				// return ;
 			};
-		} else if (client && client->isregistered() == FALSE)
+		} else if (client && client->isregistered() == false)
 			respond(ERR_NOTREGISTERED(new_displayname), fd);
 	};
 	// If client exists, is registered with valid login ID and display name,
@@ -508,10 +506,10 @@ void	Server::set_displayname(std::string new_displayname, int fd) {
 //? I had to create the placeholder variable because, otherwise, set_displayname
 //? wouldn't work due to the argument type (char '*'); it accepts only string.
 
-/* Checks if the desired display name contains invalid characters 
+/* Checks if the desired display name is too big or has invalid characters 
 (anything but alphanumeric and underscore). TRUE if valid. */
 bool	Server::isnamevalid(std::string &desired) {
-	if (desired.empty() == FALSE && desired.find_first_not_of\
+	if (!desired.empty() && desired.size() <= 9 && desired.find_first_not_of \
 ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") == std::string::npos)
 		return (true);
 	return (false);
@@ -555,16 +553,23 @@ std::string	Server::get_message(std::string &command, std::vector<std::string> &
 	std::string			message;
 	std::stringstream 	stream(command);
 
+	std::cout << "APAGAR (TESTE) ENTROU NA FUNÇÃO GET_MESSAGE." << std::endl;
 	// Gets the first three shards from the command.
-	while (stream >> shard && count--)
+	while (stream >> shard && count--) {
+		std::cout << "APAGAR (TESTE) SHARD: " << shard << std::endl;
 		temp.push_back(shard);
+		std::cout << "APAGAR (TESTE) TEMP: " << temp[0] << std::endl;
+		//TODO APAGAR COLCHETE
+	}
 	// If the command is not complete, returns an empty string.
 	if ((int)temp.size() != count)
 		return (std::string(""));
 	isolate_shard(command, temp[(count - 1)], message);
+	std::cout << "APAGAR (TESTE) MESSAGE: " << message << std::endl;
 	return (message);
 };
 
+// Polymorphs the get_message function to work with a single string.
 std::string	Server::get_message(std::string command) {
 	std::string			shard;
 	std::string			message;
@@ -602,6 +607,7 @@ void	Server::isolate_shard(std::string command, std::string isolate, std::string
 				temp.clear();
 		};
 	};
+
 	// If the element is found, adds the rest of the command to the string.
 	if (i < command.size())
 		string = command.substr(i);

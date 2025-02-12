@@ -15,30 +15,28 @@
 #include <string>
 
 // Sends a private message to a list of users and channels.
+// The format of the command should be PRIVMSG <receiver>{,<receiver>} :<message>.
 void	Server::privmsg(std::string command, int fd) {
 	std::vector<std::string>	temp;
 	std::string					proto = privmsg_utils(command, temp);
+	std::cout << "APAGAR (TESTE) PROTO: " << proto << std::endl;
 
 	// If there's no receiver, sends error 411.
 	if (!temp.size()) {
 		respond(ERR_NORECIPIENT(get_client_by_fd(fd)->get_displayname(), command), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(411, get_client_by_fd(fd)->get_displayname(), fd, " :No recipient given (PRIVMSG)\r\n");
 		return ;
 	};
-
 	// If there's no message, sends error 412.
 	if (proto.empty()) {
 		respond(ERR_NOTEXTTOSEND(get_client_by_fd(fd)->get_displayname()), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(412, get_client_by_fd(fd)->get_displayname(), fd, " :No text to send\r\n");
 		return ;
 	};
 
 	validate_receivers(temp, fd);
 	for (size_t i = 0; i < temp.size(); i++) {
-		if (temp[i][0] == '#') {
-			temp[i].erase(temp[i].begin());
+		std::cout << "APAGAR (TESTE) TEMP[" << i << "] = " << temp[i] << std::endl;
+		if (temp[i][0] == '#') { // If the receiver is a channel.
+			temp[i].erase(temp[i].begin()); // Removes the '#' from the name.
 			std::string	message = ":" + get_client_by_fd(fd)->get_displayname() + "!~" + get_client_by_fd(fd)->get_login() + "@localhost PRIVMSG #" + temp[i] + " :" + proto + CRLF;
 			get_channel_by_name(temp[i])->relay(message, fd);
 		} else {
@@ -58,6 +56,7 @@ std::string	Server::privmsg_utils(std::string command, std::vector<std::string> 
 		return (std::string(""));
 	};
 	temp.erase(temp.begin());
+	std::cout << "APAGAR (TESTE) TEMP[0]: " << temp[0] << std::endl;
 	std::string	temp_list = temp[0];	// Another temporary string for parsing.
 	std::string	receivers;	// A string that will store the parsed receivers.
 	temp.clear();
@@ -70,9 +69,12 @@ std::string	Server::privmsg_utils(std::string command, std::vector<std::string> 
 		} else
 			receivers += temp_list[i];
 	};
-
+	std::cout << "APAGAR (TESTE) MESSAGE: " << message << std::endl;
+	std::cout << "APAGAR (TESTE) RECEIVERS: " << receivers << std::endl;
+	temp.push_back(receivers);
 	// Removes empty strings.
 	for (size_t i = 0; i < temp.size(); i++) {
+		std::cout << "APAGAR (TESTE) TEMP[" << i << "] = " << temp[i] << std::endl;
 		if (temp[i].empty())
 			temp.erase(temp.begin() + i--);
 	};
@@ -80,7 +82,7 @@ std::string	Server::privmsg_utils(std::string command, std::vector<std::string> 
 	// Removes the colon.
 	if (message[0] == ':')
 		message.erase(message.begin());
-	else { // Or shrinks to the first space.
+	else { // Or shrinks to the first non-whitespace.
 		for (size_t i = 0; i < message.size(); i++) {
 			if (message[i] == ' ') {
 				message = message.substr(0, i);
