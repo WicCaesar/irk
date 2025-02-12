@@ -19,7 +19,6 @@
 void	Server::privmsg(std::string command, int fd) {
 	std::vector<std::string>	temp;
 	std::string					proto = privmsg_utils(command, temp);
-	std::cout << "APAGAR (TESTE) PROTO: " << proto << std::endl;
 
 	// If there's no receiver, sends error 411.
 	if (!temp.size()) {
@@ -75,24 +74,10 @@ std::string	Server::privmsg_utils(std::string command, std::vector<std::string> 
 			temp.erase(temp.begin() + i--);
 	};
 
-	std::cout << "APAGAR (TESTE) MESSAGE (antes do colon): " << message << std::endl;
-	// Removes the colon.
+	// Removes the colon if the message starts with it.
 	if (message[0] == ':') {
 		message.erase(message.begin());
-		std::cout << "APAGAR (TESTE) MESSAGE (if do colon): " << message << std::endl;
 	}
-	else { // Or shrinks to the first non-whitespace.
-		std::cout << "APAGAR (TESTE) MESSAGE (no último else): " << message << std::endl;
-		//! O PROBLEMA DO PRIVMSG CORTADO ESTÁ AQUI ABAIXO.
-		for (size_t i = 0; i < message.size(); i++) {
-			if (message[i] == ' ') {
-				std::cout << "APAGAR (TESTE) MESSAGE (no último if): " << message << std::endl;
-				message = message.substr(0, i);
-				std::cout << "APAGAR (TESTE) MESSAGE (após  substr):" << message << std::endl;
-				break;
-			};
-		};
-	};
 	return (message);
 };
 

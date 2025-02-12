@@ -167,7 +167,7 @@ https://www.alien.net.au/irc/irc2numerics.html
 // 221, information about a user's own modes. Some daemons have extended the mode command and certain modes take parameters (like channel modes).
 #define	RPL_UMODEIS(hostname, channelname, mode, user) (":221 " + hostname + " MODE " + channelname + " " + mode + " " + user + CRLF)
 // 324, response when the channel modes are requested.
-#define	RPL_CHANNELMODEIS(displayname, channelname, modes) (":324 " + displayname + " #" + channelname + " " + modes + CRLF)
+#define	RPL_CHANNELMODEIS(displayname, channelname, modes) (":324 " + displayname + " " + channelname + " " + modes + CRLF)
 	// Response when the channel modes are altered.
 	#define	RPL_CHANGEMODE(hostname, channelname, mode, arguments) (":" + hostname + " MODE #" + channelname + " " + mode + " " + arguments + CRLF)
 // 329, response with time of creation of the channel.
@@ -181,7 +181,7 @@ https://www.alien.net.au/irc/irc2numerics.html
 // 341, returned by the server to indicate that the attempted INVITE message was successful and is being passed onto the end client.
 #define	RPL_INVITING(displayname, invitee, channelname) (":341 " + displayname + ":Inviting " + invitee + " to #" + channelname + CRLF)
 // 353, response to NAMES.
-#define	RPL_NAMREPLY(displayname, channelname, clientslist) (":353 " + displayname + " @ #" + channelname + " :" + clientslist + CRLF)	//! Resposta com a lista de usuários em um canal
+#define	RPL_NAMREPLY(displayname, channelname, clientslist) (":353 " + displayname + " #" + channelname + " :" + clientslist + CRLF)	//! Resposta com a lista de usuários em um canal
 // 366, termination of an RPL_NAMREPLY list.
 #define	RPL_ENDOFNAMES(displayname, channelname) (":366 " + displayname + " #" + channelname + " :End of NAMES list" + CRLF)	//! Resposta indicando o fim da lista de usuários em um canal
 	// Response when a client changes their display name.

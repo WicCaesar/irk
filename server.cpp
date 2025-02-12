@@ -552,7 +552,6 @@ std::string	Server::get_message(std::string &command, std::vector<std::string> &
 	std::string			message;
 	std::stringstream 	stream(command);
 
-	std::cout << "Entrou na função GET_MESSAGE DE VÁRIOS ARGUMENTOS" << std::endl;
 	// Gets the first count shards from the command.
 	int countdown = count;
 	while (stream >> shard && countdown--)
@@ -561,7 +560,6 @@ std::string	Server::get_message(std::string &command, std::vector<std::string> &
 	if ((int)temp.size() != count)
 		return (std::string(""));
 	isolate_shard(command, temp[(count - 1)], message);
-	std::cout << "APAGAR (TESTE) MESSAGE: " << message << std::endl;
 	return (message);
 };
 
@@ -571,10 +569,8 @@ std::string	Server::get_message(std::string command) {
 	std::string			message;
 	std::stringstream 	stream(command);
 
-	std::cout << "Entrou na função GET_MESSAGE DE UM COMANDO SÓ" << std::endl;
 	stream >> shard;
 	isolate_shard(command, shard, message);
-	std::cout << "Passou pela função ISOLATE_SHARD" << std::endl;
 	if (message.empty())
 		return (std::string("QUIT"));
 	// If the reason doesn't start with a colon, adds it to the beginning.
@@ -592,8 +588,7 @@ std::string	Server::get_message(std::string command) {
 
 void	Server::isolate_shard(std::string command, std::string isolate, std::string &string) {
 	size_t	i = 0;
-	std::cout << "Entrou na função ISOLATE_SHARD" << std::endl;
-	std::cout << "APAGAR (TESTE) COMMAND: " << command << std::endl;
+
 	for (; i < command.size(); i++) {
 		if (command[i] != ' ') {
 			std::string	temp;

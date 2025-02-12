@@ -187,8 +187,6 @@ void	Server::create_channel(std::vector<std::pair<std::string, std::string> > &k
 	// If the client is a member of 10 channels (limit), sends error 405.
 	if (scour_presence(get_client_by_fd(fd)->get_displayname()) >= 10) {
 		respond(ERR_TOOMANYCHANNELS(get_client_by_fd(fd)->get_displayname()), get_client_by_fd(fd)->get_fd());
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(405, " :You have joined too many channels\r\n", get_client_by_fd(fd)->get_displayname(), get_client_by_fd(fd)->get_fd());
 		return ;
 	};
 
