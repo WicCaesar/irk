@@ -226,7 +226,7 @@ https://www.alien.net.au/irc/irc2numerics.html
 // 464, returned by the PASS command to indicate the given password was required and was either not given or was incorrect.
 #define	ERR_PASSWDMISMATCH(displayname) (":464 " + displayname + " :Password incorrect" + CRLF)
 // 467, returned when the channel key for a channel has already been set.
-#define	ERR_KEYSET(channelname) (":467 #" + channelname + "Channel key already set" + CRLF)
+#define	ERR_KEYSET(channelname) (":467 #" + channelname + " :Channel key already set" + CRLF)
 // 471, returned when attempting to join a channel which is set +l and is already full.
 #define	ERR_CHANNELISFULL(displayname, channelname) (":471 " + displayname + " #" + channelname + " :Cannot join channel (+l)" + CRLF)
 // 472, returned when a given mode is unknown.

@@ -292,7 +292,6 @@ void	Server::remove_from_all_channels(int fd) {
 			someone_removed = true;
 		};
 		// If the channel has no more members, close the channel entirely.
-		//TODO TEST. CREATE A CHANNEL, REMOVE THE CLIENT AND TRY TO SEND A PRIVMSG FOR THE CHANNEL.
 		if (channel_list_[i].get_population() == 0) {
 			channel_list_.erase(channel_list_.begin() + i);
 			i--;
@@ -410,7 +409,7 @@ void	Server::authenticate(std::string credentials, int fd) {
 		return ;
 	} else if (client->isregistered() == FALSE) {
 		std::string password = credentials;
-		if (password == this->password_) //! SHOULD THIS BE THE CLIENT'S PASSWORD OR THE SERVER'S?
+		if (password == this->password_) //! SHOULD THIS BE THE CLIENT'S PERSONAL PASSWORD OR THE SERVER'S?
 			client->set_registration_status(true);
 		else
 			respond(ERR_PASSWDMISMATCH(std::string("*")), fd);
@@ -553,14 +552,11 @@ std::string	Server::get_message(std::string &command, std::vector<std::string> &
 	std::string			message;
 	std::stringstream 	stream(command);
 
-	std::cout << "APAGAR (TESTE) ENTROU NA FUNÇÃO GET_MESSAGE." << std::endl;
-	// Gets the first three shards from the command.
-	while (stream >> shard && count--) {
-		std::cout << "APAGAR (TESTE) SHARD: " << shard << std::endl;
+	std::cout << "Entrou na função GET_MESSAGE DE VÁRIOS ARGUMENTOS" << std::endl;
+	// Gets the first count shards from the command.
+	int countdown = count;
+	while (stream >> shard && countdown--)
 		temp.push_back(shard);
-		std::cout << "APAGAR (TESTE) TEMP: " << temp[0] << std::endl;
-		//TODO APAGAR COLCHETE
-	}
 	// If the command is not complete, returns an empty string.
 	if ((int)temp.size() != count)
 		return (std::string(""));
@@ -575,8 +571,10 @@ std::string	Server::get_message(std::string command) {
 	std::string			message;
 	std::stringstream 	stream(command);
 
+	std::cout << "Entrou na função GET_MESSAGE DE UM COMANDO SÓ" << std::endl;
 	stream >> shard;
 	isolate_shard(command, shard, message);
+	std::cout << "Passou pela função ISOLATE_SHARD" << std::endl;
 	if (message.empty())
 		return (std::string("QUIT"));
 	// If the reason doesn't start with a colon, adds it to the beginning.
@@ -594,6 +592,8 @@ std::string	Server::get_message(std::string command) {
 
 void	Server::isolate_shard(std::string command, std::string isolate, std::string &string) {
 	size_t	i = 0;
+	std::cout << "Entrou na função ISOLATE_SHARD" << std::endl;
+	std::cout << "APAGAR (TESTE) COMMAND: " << command << std::endl;
 	for (; i < command.size(); i++) {
 		if (command[i] != ' ') {
 			std::string	temp;

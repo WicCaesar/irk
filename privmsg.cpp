@@ -34,7 +34,6 @@ void	Server::privmsg(std::string command, int fd) {
 
 	validate_receivers(temp, fd);
 	for (size_t i = 0; i < temp.size(); i++) {
-		std::cout << "APAGAR (TESTE) TEMP[" << i << "] = " << temp[i] << std::endl;
 		if (temp[i][0] == '#') { // If the receiver is a channel.
 			temp[i].erase(temp[i].begin()); // Removes the '#' from the name.
 			std::string	message = ":" + get_client_by_fd(fd)->get_displayname() + "!~" + get_client_by_fd(fd)->get_login() + "@localhost PRIVMSG #" + temp[i] + " :" + proto + CRLF;
@@ -51,17 +50,16 @@ std::string	Server::privmsg_utils(std::string command, std::vector<std::string> 
 	// Isolates the message from the rest of the command.
 	std::string	message = get_message(command, temp, 2);
 
-	if (temp.size() != 2) {
+	if (temp.size() < 2) {
 		temp.clear();
 		return (std::string(""));
 	};
 	temp.erase(temp.begin());
-	std::cout << "APAGAR (TESTE) TEMP[0]: " << temp[0] << std::endl;
 	std::string	temp_list = temp[0];	// Another temporary string for parsing.
 	std::string	receivers;	// A string that will store the parsed receivers.
 	temp.clear();
 
-	// Splits the first string by ',' to get the channel names.
+	// Splits the first string by ',' to get the receiver names.
 	for (size_t i = 0; i < temp_list.size(); i++) {
 		if (temp_list[i] == ',') {
 			temp.push_back(receivers);
@@ -69,23 +67,28 @@ std::string	Server::privmsg_utils(std::string command, std::vector<std::string> 
 		} else
 			receivers += temp_list[i];
 	};
-	std::cout << "APAGAR (TESTE) MESSAGE: " << message << std::endl;
-	std::cout << "APAGAR (TESTE) RECEIVERS: " << receivers << std::endl;
 	temp.push_back(receivers);
+
 	// Removes empty strings.
 	for (size_t i = 0; i < temp.size(); i++) {
-		std::cout << "APAGAR (TESTE) TEMP[" << i << "] = " << temp[i] << std::endl;
 		if (temp[i].empty())
 			temp.erase(temp.begin() + i--);
 	};
 
+	std::cout << "APAGAR (TESTE) MESSAGE (antes do colon): " << message << std::endl;
 	// Removes the colon.
-	if (message[0] == ':')
+	if (message[0] == ':') {
 		message.erase(message.begin());
+		std::cout << "APAGAR (TESTE) MESSAGE (if do colon): " << message << std::endl;
+	}
 	else { // Or shrinks to the first non-whitespace.
+		std::cout << "APAGAR (TESTE) MESSAGE (no último else): " << message << std::endl;
+		//! O PROBLEMA DO PRIVMSG CORTADO ESTÁ AQUI ABAIXO.
 		for (size_t i = 0; i < message.size(); i++) {
 			if (message[i] == ' ') {
+				std::cout << "APAGAR (TESTE) MESSAGE (no último if): " << message << std::endl;
 				message = message.substr(0, i);
+				std::cout << "APAGAR (TESTE) MESSAGE (após  substr):" << message << std::endl;
 				break;
 			};
 		};
@@ -101,15 +104,11 @@ void	Server::validate_receivers(std::vector<std::string> &temp, int fd) {
 			// If this channel doesn't exist, sends error 403.
 			if (!get_channel_by_name(temp[i])) {
 				respond(ERR_NOSUCHCHANNEL(get_client_by_fd(fd)->get_displayname(), temp[i]), fd);
-				//TODO UM OU OUTRO, TESTAR O DE CIMA
-				//senderror(403, temp[i], get_client_by_fd(fd)->get_displayname(), " :No such nick/channel\r\n");
 				temp.erase(temp.begin() + i);
 				i--;
 			// If the client is not a member of the channel, sends error 404.
 			} else if (!get_channel_by_name(temp[i])->get_client_by_name(get_client_by_fd(fd)->get_displayname())) {
 				respond(ERR_CANNOTSENDTOCHAN(get_client_by_fd(fd)->get_displayname(), temp[i]), fd);
-				//TODO UM OU OUTRO, TESTAR O DE CIMA
-				//senderror(404, get_client_by_fd(fd)->get_displayname(), "#" + temp[i], fd, " :Cannot send to channel\r\n");
 				temp.erase(temp.begin() + i);
 				i--;
 			} else
@@ -118,8 +117,6 @@ void	Server::validate_receivers(std::vector<std::string> &temp, int fd) {
 			// If the client doesn't exist, sends error 401.
 			if (!get_client_by_name(temp[i])) {
 				respond(ERR_NOSUCHNICK(temp[i], get_client_by_fd(fd)->get_displayname()), fd);
-				//TODO UM OU OUTRO, TESTAR O DE CIMA
-				//senderror(401, temp[i], get_client_by_fd(fd)->get_displayname(), " :No such nick/channel\r\n");
 				temp.erase(temp.begin() + i);
 				i--;
 			};
