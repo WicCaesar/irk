@@ -20,7 +20,7 @@ void	Server::privmsg(std::string command, int fd) {
 	std::string					proto = privmsg_utils(command, temp);
 
 	// If there's no receiver, sends error 411.
-	if (temp.size() == 0) {
+	if (!temp.size()) {
 		respond(ERR_NORECIPIENT(get_client_by_fd(fd)->get_displayname(), command), fd);
 		//TODO UM OU OUTRO, TESTAR O DE CIMA
 		//senderror(411, get_client_by_fd(fd)->get_displayname(), fd, " :No recipient given (PRIVMSG)\r\n");
@@ -43,7 +43,7 @@ void	Server::privmsg(std::string command, int fd) {
 			get_channel_by_name(temp[i])->relay(message, fd);
 		} else {
 			std::string	message = ":" + get_client_by_fd(fd)->get_displayname() + "!~" + get_client_by_fd(fd)->get_login() + "@localhost PRIVMSG " + temp[i] + " :" + proto + CRLF;
-			get_channel_by_name(temp[i])->relay(message, fd);
+			respond(message, get_client_by_name(temp[i])->get_fd());
 		};
 	};
 };

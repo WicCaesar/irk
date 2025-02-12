@@ -101,6 +101,9 @@ std::vector<std::string>	Server::get_params(std::string params) {
 	return (shards);
 };
 
+/* Sets the maximum population of a channel. If there are more users than 
+the maximum amount, nobody is kicked from the channel, but nobody can join. 
+Usage: MODE #Channel +l 42 */
 std::string	Server::channel_limit(std::vector<std::string> shards, Channel *channel, size_t &position, char binary, int fd, std::string mode_list, std::string &arguments) {
 	std::string	param;
 	std::string	limit;
@@ -134,6 +137,9 @@ std::string	Server::channel_limit(std::vector<std::string> shards, Channel *chan
 	return (param);
 };
 
+/* Promotes a member to operator, or demotes an operator to member, 
+depending on the binary operator before the letter 'o'.
+Usage: MODE #Channel +o new_operator || MODE #Channel -o bad_operator */
 std::string	Server::operator_privilege(std::vector<std::string> shards, Channel *channel, size_t &position, char binary, int fd, std::string mode_list, std::string &arguments) {
 	std::string	param;
 	std::string	user;
@@ -174,6 +180,9 @@ std::string	Server::operator_privilege(std::vector<std::string> shards, Channel 
 	return (param);
 };
 
+/* New members of the channel can only join if they add the right password 
+as second argument of the JOIN command. 
+Usage: MODE #Channel +k password */
 std::string	Server::password_mode(std::vector<std::string> shards, Channel *channel, size_t &position, char binary, int fd, std::string mode_list, std::string &arguments) {
 	std::string	param;
 	std::string	password;
@@ -212,19 +221,25 @@ std::string	Server::password_mode(std::vector<std::string> shards, Channel *chan
 	return (param);
 };
 
+/* This channel is now only accessible if a member uses this command with 
+another client's display name. Only then they can successfully join.
+Usage: MODE #Channel +i -> INVITE name #Channel */
 std::string	Server::invite_only(Channel *channel, char binary, std::string mode_list) {
 	std::string	param;
 	param.clear();
-
-	if (binary == '+' && channel->get_mode_at_index(0) == false) {
+	std::cout << "APAGAR Chegou no invite_only." << std::endl;
+	if (binary == '+' && !channel->get_mode_at_index(3)) {
 		channel->set_mode_at_index(3, true);
 		channel->lock(true);
 		param = append_mode(mode_list, binary, 'i');
+		std::cout << "APAGAR Entrou no if do invite_only." << std::endl;
 	} else if (binary == '-' && channel->get_mode_at_index(3)) {
 		channel->set_mode_at_index(3, false);
 		channel->lock(false);
 		param = append_mode(mode_list, binary, 'i');
+		std::cout << "APAGAR Entrou no else do invite_only." << std::endl;
 	};
+	std::cout << "APAGAR Passou pelo invite_only e vai retornar." << std::endl;
 	return (param);
 };
 

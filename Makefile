@@ -14,7 +14,7 @@ COMPILE	= c++
 FLAGS	= -Wall -Wextra -Werror -O3 -std=c++98
 # Replaced -g with -O3 to optimise the code (removing debug symbols).
 # -O3 is faster than -g and -O2, but it takes longer to compile.
-VALGRIND	= valgrind -s --leak-check=full --show-leak-kinds=all
+VALGRIND	= valgrind -s --track-origins=yes --leak-check=full --show-leak-kinds=all
 # -s to suppress the summary, -v to show the full report.
 # --track-origins=yes to show where the memory was allocated.
 REMOVE	= rm -f
@@ -41,7 +41,7 @@ run:	$(NAME)
 	./$(NAME) 6667 senha42
 # Open a new terminal and type:
 # nc localhost 6667
-# PASS 53nh4P35504L
+# PASS senha42
 # NICK WicCaesar
 # USER cnascime 0 * César Augusto
 

@@ -353,7 +353,8 @@ void	Server::execute_command(std::string &command, int fd) {
 		if (queue[0] == "USER" || queue[0] == "/bong")
 			this->set_login(command, fd); // Changes the login ID (for access).
 			//TODO TENTAR SEM THIS->
-		else if (queue[0] == "PASS" || queue[0] == "/pass")
+		else if (queue[0] == "PASS" || queue[0] == "/pass" \
+				|| queue[0] == "AUTHENTICATE" || queue[0] == "/authenticate")
 			authenticate(command, fd); // Authenticates the client.
 		else if (queue[0] == "NICK" || queue[0] == "/nick")
 			set_displayname(command, fd); // Changes the display name.
@@ -361,17 +362,20 @@ void	Server::execute_command(std::string &command, int fd) {
 			quit(command, fd);
 		else if (isregistered(fd) == TRUE) {
 			if (queue[0] == "KICK" || queue[0] == "/kick")
-				kick(command, fd);
+				kick(command, fd); // Removes a member from a channel.
 			else if (queue[0] == "JOIN" || queue[0] == "/join")
 				join_utils(command, fd);
 			else if (queue[0] == "PART" || queue[0] == "/part")
-				part(command, fd);
-			else if (queue[0] == "PRIVMSG" || queue[0] == "/privmsg")
+				part(command, fd); // Leaves a channel without quitting the server.
+			else if (queue[0] == "PRIVMSG" || queue[0] == "/privmsg" \
+					|| queue[0] == "MSG" || queue[0] == "/msg" \
+					|| queue[0] == "SAY" || queue[0] == "/say" \
+					|| queue[0] == "SAYTO" || queue[0] == "/sayto")
 				privmsg(command, fd);
 			else if (queue[0] == "MODE" || queue[0] == "/mode")
-				mode_utils(command, fd); // Changes the mode of a channel.
+				mode_utils(command, fd); // Changes options in a channel.
 			else if (queue[0] == "TOPIC" || queue[0] == "/topic")
-				topic_utils(command, fd); // Changes the subject of a channel.
+				topic_utils(command, fd);
 			else if (queue[0] == "INVITE" || queue[0] == "/invite")
 				invite_utils(command, fd);
 			else
