@@ -104,7 +104,7 @@ bool	Server::signal_ = false;
 void Server::antenna(int signal) {
 	(void)signal;
 	//! APAGAR ABAIXO OU TROCAR POR EMOJI OU OUTRA COISA
-	std::cout << "\n🛜 Sinal recebido!" << std::endl;
+	std::cout << "\nSinal recebido!" << std::endl;
 	//! APAGAR ACIMA OU TROCAR POR EMOJI OU OUTRA COISA
 	Server::signal_ = true;
 };
@@ -116,12 +116,11 @@ void	Server::start(int port, std::string password) {
 
 	std::cout << "Aguardando conexão…" << std::endl;
 	while (Server::signal_ == false) {
-		//TODO ESTUDAR MUITO SOBRE POLL, VER DIFERENÇAS PARA EPOLL.
-		//TODO VER COMO SE INTERLIGA COM O SOQUETE, O-NONBLOCKING.
+		//TODO STUDY POLL, HOW IT'S DIFFERENT FROM EPOLL, HOW IT LINKS TO THE SOCKET, 0_NONBLOCKING.
 		// If the poll call fails and no signal is received, throws an exception.
 		if ((poll(&fd_list_[0], fd_list_.size(), -1) == -1) 
 			&& Server::signal_ == false)
-			throw(std::runtime_error("Falha no poll.")); //! TROCAR MENSAGEM
+			throw(std::runtime_error("Falha no poll.")); //! CHANGE THIS MESSAGE.
 		for (size_t i = 0; i < fd_list_.size(); i++) {
 			// What to do if there's incoming data to read on the socket?
 			if (fd_list_[i].revents && POLLIN) {
@@ -155,9 +154,9 @@ void	Server::close_fd(void) {
 
 // Adjusts the IRC server socket.
 void	Server::socket_setup(void) {
-	//! CORTAR OU MANTER O ADDRESS ABAIXO? ACHO QUE DEVO USAR O DA PRÓPRIA CLASSE.
+	//! REMOVE OR KEEP THE ADDRESS BELOW? I THINK I SHOULD'VE USED THE ADDRESS OF THE CLASS ITSELF.
 	// struct sockaddr_in address;
-	//TODO EM VEZ DESSE NOVO ADDRESS, ACHO QUE TEM DE SER this->server_address_ - TESTAR
+	//TODO INSTEAD OF THIS NEW ADDRESS, I THINK IT SHOULD BE this->server_address_ - TEST IT.
 
 	int enable = TRUE; // Enables options for setsockopt (SO_REUSEADDR, O_NONBLOCK).
 	this->server_address_.sin_family = AF_INET; // Sets the address to IPv4 (AF_INET6 for IPv6).
@@ -187,7 +186,6 @@ void	Server::socket_setup(void) {
 	if (listen(socket_, SOMAXCONN) == -1)
 		throw(std::runtime_error("Falha na escuta."));
 
-	//TODO TESTAR SEM O THIS->
 	this->newclient_.fd = socket_;
 	/* Requested events are conditions to be met for the poll call to return.
 	It's set to POLLIN, which is incoming data. Could be read, write, error… */
@@ -283,36 +281,31 @@ void	Server::remove_channel_from_list(std::string name) {
 
 void	Server::remove_from_all_channels(int fd) {
 	for (size_t i = 0; i < this->channel_list_.size(); i++) {
-		int someone_removed = FALSE;
+		bool someone_removed = false;
 		// If this client is in the channel, removes it.
 		if (channel_list_[i].get_client_by_fd(fd)) {
 			channel_list_[i].remove_client(fd);
-			someone_removed = TRUE;
+			someone_removed = true;
 		// If this client is an admin of the channel, removes it.
-		//TODO TESTAR PARA VER SE A ORDEM LÓGICA ESTÁ CORRETA
+		//TODO TEST IF THE LOGIC IS IN RIGHT ORDER.
 		} else if (channel_list_[i].get_admin_by_fd(fd)) {
 			channel_list_[i].remove_admin(fd);
-			someone_removed = TRUE;
+			someone_removed = true;
 		};
 		// If the channel has no more clients, removes the channel entirely.
-		//TODO TESTAR
+		//TODO TEST.
 		if (channel_list_[i].get_population() == 0) {
 			channel_list_.erase(channel_list_.begin() + i);
 			i--;
 			continue;
 		};
 		// If the client was removed from the channel, sends a message to the channel.
-		//! ISSO É NECESSÁRIO (MENSAGEM E MONITORAMENTO)? CHECAR NO PDF E RÉGUA.
-		//! TEM UMA FUNÇÃO NO CLIENTE QUE JÁ FORNECE ESSA STRING FORMATADA (get_hostname)
-		if (someone_removed == TRUE) {
+		if (someone_removed == true) {
 			std::string response = ":" + get_client_by_fd(fd)->get_displayname() + "!~" \
 				+ get_client_by_fd(fd)->get_login() + "@localhost QUIT Quit\r\n";
-			// Example of the message above:
-			// :cnascime!~cnascime@localhost QUIT Quit\r\n
-			// The : is the prefix, the cnascime is the nickname, the !~ is the separator, the cnascime is the username,
-			// the @localhost is the hostname, the QUIT is the command, and the Quit is the message.
-		}
-		
+			// <prefix> <nickname> <separator> <username> <hostname> <action> <message>
+			//     :     WicCaesar      !~      cnascime  @localhost   QUIT     Quit
+		};
 	};
 };
 
@@ -332,7 +325,6 @@ std::vector<std::string> Server::split_buffer(std::string buffer) {
 };
 
 // Splits series of commands into separate tokens.
-//TODO Entender melhor como o programa encontra onde separar.
 std::vector<std::string>	Server::split_command(std::string &commands) {
 	std::vector<std::string> queue;
 	std::istringstream stream(commands);
@@ -346,7 +338,6 @@ std::vector<std::string>	Server::split_command(std::string &commands) {
 };
 
 // Executes the command received from the client.
-//! Coloquei um if adiante para fazer checagem só uma vez, potencial de risco de erro.
 void	Server::execute_command(std::string &command, int fd) {
 	if (command.empty())
 		return ;
@@ -357,43 +348,41 @@ void	Server::execute_command(std::string &command, int fd) {
 		command = command.substr(found); // Removes everything before non-whitespaces.
 	// If there's something on the queue, compares to these possibilities.
 	if (queue.size()) {
-		if (queue[0] == "BONG")
+		if (queue[0] == "BONG" || queue[0] == "/bong")
 			return ; // bong is a ping equivalent.
-		if (queue[0] == "USER")
+		if (queue[0] == "USER" || queue[0] == "/bong")
 			this->set_login(command, fd); // Changes the login ID (for access).
 			//TODO TENTAR SEM THIS->
-		else if (queue[0] == "PASS")
+		else if (queue[0] == "PASS" || queue[0] == "/pass")
 			authenticate(command, fd); // Authenticates the client.
-		else if (queue[0] == "NICK")
+		else if (queue[0] == "NICK" || queue[0] == "/nick")
 			set_displayname(command, fd); // Changes the display name.
-		else if (queue[0] == "QUIT")
+		else if (queue[0] == "QUIT" || queue[0] == "/quit")
 			quit(command, fd);
 		else if (isregistered(fd) == TRUE) {
-			if (queue[0] == "KICK")
+			if (queue[0] == "KICK" || queue[0] == "/kick")
 				kick(command, fd);
-			else if (queue[0] == "JOIN")
+			else if (queue[0] == "JOIN" || queue[0] == "/join")
 				join_utils(command, fd);
-			else if (queue[0] == "PART")
+			else if (queue[0] == "PART" || queue[0] == "/part")
 				part(command, fd);
-			else if (queue[0] == "PRIVMSG")
+			else if (queue[0] == "PRIVMSG" || queue[0] == "/privmsg")
 				privmsg(command, fd);
-			else if (queue[0] == "MODE")
+			else if (queue[0] == "MODE" || queue[0] == "/mode")
 				mode_utils(command, fd); // Changes the mode of a channel.
-			else if (queue[0] == "TOPIC")
+			else if (queue[0] == "TOPIC" || queue[0] == "/topic")
 				topic_utils(command, fd); // Changes the subject of a channel.
-			else if (queue[0] == "INVITE")
+			else if (queue[0] == "INVITE" || queue[0] == "/invite")
 				invite_utils(command, fd);
-			else //TODO Checar a lógica aqui. Isso devia estar dentro ou fora do if unregistered?
+			else
 				respond(ERR_UNKNOWNCOMMAND(get_client_by_fd(fd)->get_displayname(), queue[0]), fd);
 		} else if (isregistered(fd) == FALSE)
-			//TODO Checar o porquê desse asterisco.
 			respond(ERR_NOTREGISTERED(std::string("*")), fd);
 	};
 };
 
 // Checks a series of indicators to see whether a client is registered.
 bool	Server::isregistered(int fd) {
-	//TODO Checar a lógica.
 	if (get_client_by_fd(fd) == FALSE || get_client_by_fd(fd)->get_login().empty() 
 	|| get_client_by_fd(fd)->get_login().empty() || get_client_by_fd(fd)->get_displayname() == "*"
 	|| get_client_by_fd(fd)->isonline() == false)
@@ -418,7 +407,7 @@ void	Server::authenticate(std::string credentials, int fd) {
 		return ;
 	} else if (client->isregistered() == FALSE) {
 		std::string password = credentials;
-		if (password == this->password_) //! ACHO QUE TEM DE SER A SENHA DO CLIENTE, NÃO DO SERVIDOR.
+		if (password == this->password_) //! SHOULD THIS BE THE CLIENT'S PASSWORD OR THE SERVER'S?
 			client->set_registration_status(true);
 		else
 			respond(ERR_PASSWDMISMATCH(std::string("*")), fd);
@@ -430,23 +419,22 @@ void	Server::set_login(std::string &login, int fd) {
 	Client	*client = get_client_by_fd(fd);
 	std::vector<std::string>	shards = split_command(login);
 
-	// The string is passed similar to "USER cnascime 0 * :cnascime".
-	// (command, username, mode, real name and hostname)
+	// The string is passed as "USER cnascime 0 * César Augusto".
 	if (client && shards.size() < 5) {
 		respond(ERR_NEEDMOREPARAMS(client->get_displayname()), fd);
 		return ;
 	};
 	if (!client || client->isregistered() == FALSE) {
 		respond(ERR_NOTREGISTERED(std::string("*")), fd);
-		return ; //! RETURN OU NÃO? ACHO QUE NÃO.
+		return ; //! RETURN OR NOT? I'M GUESSING NOT.
 	} else if (client && client->get_login().empty() == FALSE) {
 		respond(ERR_ALREADYREGISTRED(client->get_displayname()), fd);
 		return ;
 	} else
 		client->set_login(shards[1]);
 
-	// If client exists, is registered with valid login ID and display name,
-	// but online status is set to false, changes it to true and sends response.
+	/* If client exists, is registered with valid login ID and display name, 
+	but online status is set to false, changes it to true and sends response. */
 	if (client && client->isregistered() && !client->get_login().empty() 
 	&& !client->get_displayname().empty() && client->get_displayname() != "*" 
 	&& !client->isonline())	{

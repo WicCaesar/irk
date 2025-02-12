@@ -280,7 +280,6 @@ bool	Server::good_password(std::string password) {
 	if (password.empty())
 		return (false);
 	for (size_t i = 0; i < password.size(); i++) {
-		//TODO TESTAR SE REALMENTE ESTÁ ACEITANDO SENHA COM SUBLINHA.
 		if (std::isalnum(password[i] == false) && password[i] != '_')
 			return (false);
 	};

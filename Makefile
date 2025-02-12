@@ -39,9 +39,14 @@ re:		fclean all
 #6667 is the default port for IRC. 6697 for TLS.
 run:	$(NAME)
 	./$(NAME) 6667 senha42
+# Open a new terminal and type:
+# nc localhost 6667
+# PASS 53nh4P35504L
+# NICK WicCaesar
+# USER cnascime 0 * César Augusto
 
 vrun:	$(NAME)
-	$(VALGRIND) ./$(NAME)
+	$(VALGRIND) ./$(NAME) 6667 senha42
 
 rerun:	re run
 

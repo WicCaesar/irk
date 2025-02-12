@@ -179,7 +179,7 @@ https://www.alien.net.au/irc/irc2numerics.html
 // 333, response to TOPIC with the set topic and the user who set it.
 #define	RPL_TOPICWHOTIME(displayname, channelname, topic) (":333 " + displayname + " #" + channelname + " " + displayname + " " + get_channel_by_name(channelname)->get_creation_auto() + CRLF)
 // 341, returned by the server to indicate that the attempted INVITE message was successful and is being passed onto the end client.
-#define	RPL_INVITING(displayname, channelname) (":341 :Inviting " + displayname + "to #" + channelname + CRLF)
+#define	RPL_INVITING(displayname, invitee, channelname) (":341 " + displayname + ":Inviting " + invitee + " to #" + channelname + CRLF)
 // 353, response to NAMES.
 #define	RPL_NAMREPLY(displayname, channelname, clientslist) (":353 " + displayname + " @ #" + channelname + " :" + clientslist + CRLF)	//! Resposta com a lista de usuários em um canal
 // 366, termination of an RPL_NAMREPLY list.

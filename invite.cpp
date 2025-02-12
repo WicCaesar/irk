@@ -19,8 +19,6 @@ void	Server::invite_utils(std::string &command, int &fd) {
 	std::vector<std::string> kintsugi = split_command(command);
 	if (kintsugi.size() < 3) {
 		respond(ERR_NEEDMOREPARAMS(get_client_by_fd(fd)->get_displayname()), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(461, " :Not enough parameters\r\n", get_client_by_fd(fd)->get_displayname(), fd);
 		return ;
 	};
 
@@ -28,8 +26,6 @@ void	Server::invite_utils(std::string &command, int &fd) {
 	std::string channel = kintsugi[2].substr(1);
 	if (kintsugi[2][0] != '#' || get_channel_by_name(channel) == NULL) {
 		respond(ERR_NOSUCHCHANNEL(get_client_by_fd(fd)->get_displayname(), channel), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(403, " :No such channel\r\n", channel, fd);
 		return ;
 	};
 
@@ -37,25 +33,19 @@ void	Server::invite_utils(std::string &command, int &fd) {
 	if (!(get_channel_by_name(channel)->get_client_by_fd(fd)) 
 	&& !(get_channel_by_name(channel)->get_admin_by_fd(fd))) {
 		respond(ERR_NOTONCHANNEL(get_client_by_fd(fd)->get_displayname(), channel), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(442, " :You're not on that channel\r\n", channel, fd);
 		return ;
 	};
 
-	Client *client = get_client_by_name(kintsugi[1]);
 	// If the invited user does not exist, sends error 401.
+	Client *client = get_client_by_name(kintsugi[1]);
 	if (!client) {
 		respond(ERR_NOSUCHNICK(channel, kintsugi[1]), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(401, kintsugi[1], channel, fd);
 		return ;
 	};
 
 	// If the invitated user is already a member, sends error 443.
 	if (get_channel_by_name(channel)->get_client_by_name(client->get_displayname())) {
 		respond(ERR_USERONCHANNEL(get_client_by_fd(fd)->get_displayname(), channel), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(443, " :is already on channel\r\n", channel, fd);
 		return ;
 	};
 
@@ -80,5 +70,5 @@ void	Server::invite_utils(std::string &command, int &fd) {
 	//TODO COMPARAR SE RESULTADO ESTÁ SATISFATÓRIO
 	// Sends invitation after all the checks, and responds 341.
 	client->invite_to_channel(channel);
-	respond(RPL_INVITING(get_client_by_fd(fd)->get_displayname(), channel), fd);	
+	respond(RPL_INVITING(get_client_by_fd(fd)->get_displayname(), kintsugi[1], channel), fd);	
 };

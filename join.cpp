@@ -20,19 +20,12 @@ void	Server::join_utils(std::string command, int fd) {
 
 	if (pairing(kintsugi, command, fd) == false) {
 		respond(ERR_NEEDMOREPARAMS(get_client_by_fd(fd)->get_displayname()), get_client_by_fd(fd)->get_fd());
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(461, " :Not enough parameters\r\n", get_client_by_fd(fd)->get_displayname(), get_client_by_fd(fd)->get_fd());
 		return ;
 	};
 
-	// Mustn't enter more than 10 channels at once.
-	//TODO AQUI É PARA TER O NOME DO CANAL QUE ESTÁ TENTANDO ENTRAR. COMO FAZER ISSO? OBSERVAR OUTRO JÁ PRONTO.
-	//TODO TESTAR SE ESTÁ DE ACORDO COM A DESCRIÇÃO: Sent to a user when they have joined the maximum number of allowed channels and they try to join another channel.
-	if (kintsugi.size() > 10) {
+	// Mustn't enter more than 10 channels.
+	if (kintsugi.size() > 10)
 		respond(ERR_TOOMANYCHANNELS(get_client_by_fd(fd)->get_displayname()), get_client_by_fd(fd)->get_fd());
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(405, " :You have joined too many channels\r\n", get_client_by_fd(fd)->get_displayname(), get_client_by_fd(fd)->get_fd());
-	};
 
 	for (size_t i = 0; i < kintsugi.size(); i++) {
 		bool flag = false;
@@ -68,14 +61,13 @@ int	Server::pairing(std::vector<std::pair<std::string, std::string> > &kintsugi,
 		return (0);
 	};
 
-	temp.erase(temp.begin()); // Removes JOIN.
-	channel = temp[0]; // Stores the channel name.
-	temp.erase(temp.begin()); // Removes the channel name.
-	if (temp.size() > 0) { // If there's another shard, it must be a password.
-		password = temp[0]; // Stores the password.
+	temp.erase(temp.begin());	// Removes JOIN.
+	channel = temp[0]; 			// Stores the channel name.
+	temp.erase(temp.begin());	// Removes the channel name.
+	if (temp.size() > 0) {		// If there's another shard, it must be a password.
+		password = temp[0];		// Stores the password.
 		temp.clear();
-		// TODO TESTAR O DE CIMA (SUGESTÃO DO LULU) E O DE BAIXO (MEU)
-		// temp.erase(temp.begin()); // Removes the password.
+		// temp.erase(temp.begin());	// Removes the password.
 	};
 
 	// Gets shards from channel, separated by commas. Adds them to the kintsugi.
@@ -113,13 +105,10 @@ int	Server::pairing(std::vector<std::pair<std::string, std::string> > &kintsugi,
 	for (size_t i = 0; i < kintsugi.size(); i++) {
 		if (*(kintsugi[i].first.begin()) != '#') {
 			respond(ERR_NOSUCHCHANNEL(get_client_by_fd(fd)->get_displayname(), kintsugi[i].first), get_client_by_fd(fd)->get_fd());
-			//TODO UM OU OUTRO, TESTAR O DE CIMA
-			//senderror(403, " :No such channel\r\n", get_client_by_fd(fd)->get_displayname(), kintsugi[i].first, get_client_by_fd(fd)->get_fd());
 			kintsugi.erase(kintsugi.begin() + i--);
 		} else
 			kintsugi[i].first.erase(kintsugi[i].first.begin());
 	};
-
 	return (1);
 };
 
@@ -131,8 +120,6 @@ void	Server::join_channel(std::vector<std::pair<std::string, std::string> > &kin
 	// If the client is a member of 10 channels (limit), sends error 405.
 	if (scour_presence(get_client_by_fd(fd)->get_displayname()) >= 10) {
 		respond(ERR_TOOMANYCHANNELS(get_client_by_fd(fd)->get_displayname()), get_client_by_fd(fd)->get_fd());
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(405, " :You have joined too many channels\r\n", get_client_by_fd(fd)->get_displayname(), get_client_by_fd(fd)->get_fd());
 		return ;
 	};
 
@@ -141,8 +128,6 @@ void	Server::join_channel(std::vector<std::pair<std::string, std::string> > &kin
 		&& this->channel_list_[j].get_password() != kintsugi[i].second) {
 		if (isinvited(get_client_by_fd(fd), kintsugi[i].first, 0) == false) {
 			respond(ERR_BADCHANNELKEY(get_client_by_fd(fd)->get_displayname(), kintsugi[i].first), get_client_by_fd(fd)->get_fd());
-			//TODO UM OU OUTRO, TESTAR O DE CIMA
-			//senderror(475, " :Cannot join channel (+k)\r\n", get_client_by_fd(fd)->get_displayname(), "#" + kintsugi[i].first, get_client_by_fd(fd)->get_fd());
 			return ;
 		};
 	};
@@ -151,8 +136,6 @@ void	Server::join_channel(std::vector<std::pair<std::string, std::string> > &kin
 	if (this->channel_list_[j].isprivate() == true) {
 		if (isinvited(get_client_by_fd(fd), kintsugi[i].first, 1) == false) {
 			respond(ERR_INVITEONLYCHAN(get_client_by_fd(fd)->get_displayname(), kintsugi[i].first), get_client_by_fd(fd)->get_fd());
-			//TODO UM OU OUTRO, TESTAR O DE CIMA
-			//senderror(473, " :Cannot join channel (+i)\r\n", get_client_by_fd(fd)->get_displayname(), "#" + kintsugi[i].first, get_client_by_fd(fd)->get_fd());
 			return ;
 		};
 	};
@@ -161,8 +144,6 @@ void	Server::join_channel(std::vector<std::pair<std::string, std::string> > &kin
 	if (this->channel_list_[j].get_max_population() 
 		&& this->channel_list_[j].get_population() >= this->channel_list_[j].get_max_population()) {
 		respond(ERR_CHANNELISFULL(get_client_by_fd(fd)->get_displayname(), kintsugi[i].first), get_client_by_fd(fd)->get_fd());
-		// TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(471, " :Cannot join channel (+l)\r\n", get_client_by_fd(fd)->get_displayname(), "#" + kintsugi[i].first, get_client_by_fd(fd)->get_fd());
 		return ;
 	};
 
