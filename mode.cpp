@@ -197,18 +197,24 @@ std::string	Server::password_mode(std::vector<std::string> shards, Channel *chan
 		return (param);
 	};
 
+	std::cout << "APAGAR (TESTE) Password 1: " << password << std::endl;
+
 	// If the password is not up to the standards, sends error.
 	if (good_password(password) == false) {
 		respond(ERR_INVALIDMODEPARAM(channel->get_name(), "(k)"), fd);
 		return (param);
 	};
 
+	std::cout << "APAGAR (TESTE) Password 2: " << password << std::endl;
+	
 	if (binary == '+') {
 		channel->set_mode_at_index(2, true);
 		channel->set_password(password);
+		std::cout << "APAGAR (TESTE) Password 3: " << password << std::endl;
 		if (!arguments.empty())
 			arguments += " ";
 		arguments += password;
+		std::cout << "APAGAR (TESTE) Password 4: " << password << std::endl;
 		param = append_mode(mode_list, binary, 'k');
 	} else if (binary == '-' && channel->get_mode_at_index(2)) {
 		if (password == channel->get_password()) {

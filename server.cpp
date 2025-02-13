@@ -161,7 +161,8 @@ void	Server::socket_setup(void) {
 	this->server_address_.sin_addr.s_addr = INADDR_ANY; // Allows connections to any address (including local).
 	/* in_addr typically has a single member, representing the IPv4 address.
 	INADDR_ANY represents “any” IP address, meaning the socket will be bound to
-	all available network interfaces on the host. */
+	all available network interfaces on the host. Useful when machines can have 
+	multiple interpretations like reading from right to left and left to right. */
 	
 	/* Creates the server socket (which is really a file descriptor with value 3). 
 	The previous are stdin (0), stdout (1) and stderr (2). */
@@ -350,9 +351,7 @@ void	Server::execute_command(std::string &command, int fd) {
 			return ; // bong is a ping equivalent.
 		if (queue[0] == "USER" || queue[0] == "/bong")
 			this->set_login(command, fd); // Changes the login ID (for access).
-			//TODO TRY WITHOUT "THIS->".
-		else if (queue[0] == "PASS" || queue[0] == "/pass" \
-				|| queue[0] == "AUTHENTICATE" || queue[0] == "/authenticate")
+		else if (queue[0] == "PASS")
 			authenticate(command, fd); // Authenticates the client.
 		else if (queue[0] == "NICK" || queue[0] == "/nick")
 			set_displayname(command, fd); // Changes the display name.
@@ -409,7 +408,7 @@ void	Server::authenticate(std::string credentials, int fd) {
 		return ;
 	} else if (client->isregistered() == FALSE) {
 		std::string password = credentials;
-		if (password == this->password_) //! SHOULD THIS BE THE CLIENT'S PERSONAL PASSWORD OR THE SERVER'S?
+		if (password == this->password_)
 			client->set_registration_status(true);
 		else
 			respond(ERR_PASSWDMISMATCH(std::string("*")), fd);
@@ -421,14 +420,16 @@ void	Server::set_login(std::string &login, int fd) {
 	Client	*client = get_client_by_fd(fd);
 	std::vector<std::string>	shards = split_command(login);
 
-	// The string is passed as "USER cnascime 0 * César Augusto".
+	/* The string is passed as "USER cnascime 0 * César Augusto".
+	In the standard, 0 would be the user mode, and * their real name,
+	but this was not implemented in my version. */
 	if (client && shards.size() < 5) {
 		respond(ERR_NEEDMOREPARAMS(client->get_displayname()), fd);
 		return ;
 	};
 	if (!client || client->isregistered() == false) {
 		respond(ERR_NOTREGISTERED(std::string("*")), fd);
-		// return ; //! RETURN OR NOT? I'M GUESSING NOT.
+		return ;
 	} else if (client && !client->get_login().empty()) {
 		respond(ERR_ALREADYREGISTRED(client->get_displayname()), fd);
 		return ;
@@ -485,7 +486,6 @@ void	Server::set_displayname(std::string new_displayname, int fd) {
 					// connects the client and sends a reply with the new name.
 					client->set_online_status(true);
 					respond(RPL_WELCOME(client->get_displayname()), fd);
-					//TODO TEST IF IT WOULD SEEM REDUNDANT ADDING RPL_NAMECHANGE INSIDE THIS CONDITION (WITH THE NEW NAME).
 				};
 				respond(RPL_NAMECHANGE(old_name, client->get_displayname()), fd);
 				// return ;

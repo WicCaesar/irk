@@ -181,9 +181,9 @@ https://www.alien.net.au/irc/irc2numerics.html
 // 341, returned by the server to indicate that the attempted INVITE message was successful and is being passed onto the end client.
 #define	RPL_INVITING(displayname, invitee, channelname) (":341 " + displayname + ":Inviting " + invitee + " to #" + channelname + CRLF)
 // 353, response to NAMES.
-#define	RPL_NAMREPLY(displayname, channelname, clientslist) (":353 " + displayname + " #" + channelname + " :" + clientslist + CRLF)	//! Resposta com a lista de usuários em um canal
+#define	RPL_NAMREPLY(displayname, channelname, clientslist) (":353 " + displayname + " #" + channelname + " :" + clientslist + CRLF)
 // 366, termination of an RPL_NAMREPLY list.
-#define	RPL_ENDOFNAMES(displayname, channelname) (":366 " + displayname + " #" + channelname + " :End of NAMES list" + CRLF)	//! Resposta indicando o fim da lista de usuários em um canal
+#define	RPL_ENDOFNAMES(displayname, channelname) (":366 " + displayname + " #" + channelname + " :End of NAMES list" + CRLF)
 	// Response when a client changes their display name.
 	#define	RPL_NAMECHANGE(old_displayname, displayname) (":" + old_displayname + " NICK " + displayname + CRLF)
 	// Response when a client joins a channel.
@@ -238,8 +238,8 @@ https://www.alien.net.au/irc/irc2numerics.html
 // 482, returned by any command requiring operator privileges to indicate the operation was unsuccessful.
 #define	ERR_CHANOPRIVSNEEDED(displayname, channelname) (":482 #" + channelname + " :You're not channel operator" + CRLF)
 	// 696?
-	#define	ERR_NEEDMODEPARAM(channelname, mode) ("#" + channelname + " * :You must specify a parameter for the key mode " + mode + CRLF)	// Erro quando um parâmetro para o modo de chave é necessário
+	#define	ERR_NEEDMODEPARAM(channelname, mode) ("#" + channelname + " * :You must specify a parameter for the key mode " + mode + CRLF)
 	// 696? 
-	#define	ERR_INVALIDMODEPARAM(channelname, mode) ("#" + channelname + " :Invalid mode parameter " + mode + CRLF)						// Erro quando um parâmetro de modo é inválido
+	#define	ERR_INVALIDMODEPARAM(channelname, mode) ("#" + channelname + " :Invalid mode parameter " + mode + CRLF)
 
 #endif
