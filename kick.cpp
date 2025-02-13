@@ -22,21 +22,18 @@ void	Server::kick(std::string command, int fd) {
 	// If the user is not provided, sends error 461.
 	if (user.empty()) {
 		respond(ERR_NEEDMOREPARAMS(get_client_by_fd(fd)->get_displayname()), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(461, " :Not enough parameters\r\n", get_client_by_fd(fd)->get_displayname(), fd);
 		return ;
 	};
+
 	for (size_t i = 0; i < temp.size(); i++) {
 		if (get_channel_by_name(temp[i])) {
 			Channel	*channel = get_channel_by_name(temp[i]);
 			// Checks if the client is in the channel.
 			if (!channel->get_client_by_fd(fd) && !channel->get_admin_by_fd(fd)) {
 				respond(ERR_NOTONCHANNEL(get_client_by_fd(fd)->get_displayname(), channel->get_name()), fd);
-				//TODO UM OU OUTRO, TESTAR O DE CIMA
-				//senderror(442, ":You're not on that channel\r\n", get_client_by_fd(fd)->get_displayname(), channel->get_name(), fd);
 				continue;
 			};
-			// If the client is an admin of the channel, removes them.
+			// If the client is an admin of the channel.
 			if (channel->get_admin_by_fd(fd)) {
 				// Checks if the member to be expelled is in the channel.
 				if (channel->get_client_by_name(user)) {
@@ -45,7 +42,7 @@ void	Server::kick(std::string command, int fd) {
 					stream << ":" << get_client_by_fd(fd)->get_displayname() 
 						<< "!~" << get_client_by_fd(fd)->get_displayname() 
 						<< "@localhost KICK #" << temp[i] << " " << user;
-					if (reason.empty() == false)
+					if (!reason.empty())
 						stream << " :" << reason << "\r\n";
 					else
 						stream << "\r\n";
@@ -62,20 +59,14 @@ void	Server::kick(std::string command, int fd) {
 						this->channel_list_.erase(this->channel_list_.begin() + i);
 				} else {
 					respond(ERR_USERNOTINCHANNEL(get_client_by_fd(fd)->get_displayname(), temp[i]), get_client_by_fd(fd)->get_fd());
-					//TODO UM OU OUTRO, TESTAR O DE CIMA
-					//senderror(441, ":They aren't on that channel\r\n", get_client_by_fd(fd)->get_displayname(), "#" + temp[i], get_client_by_fd(fd)->get_fd());
 					continue;
 				};
 			} else {
 				respond(ERR_CHANOPRIVSNEEDED(get_client_by_fd(fd)->get_displayname(), temp[i]), get_client_by_fd(fd)->get_fd());
-				//TODO UM OU OUTRO, TESTAR O DE CIMA
-				//senderror(482, " :You're not channel operator\r\n", get_client_by_fd(fd)->get_displayname(), "#" + temp[i], get_client_by_fd(fd)->get_fd());
 				continue;
 			};
 		} else
 			respond(ERR_NOSUCHCHANNEL(get_client_by_fd(fd)->get_displayname(), temp[i]), get_client_by_fd(fd)->get_fd());
-			//TODO UM OU OUTRO, TESTAR O DE CIMA
-			//senderror(403, " :No such channel\r\n", get_client_by_fd(fd)->get_displayname(), "#" + temp[i], get_client_by_fd(fd)->get_fd());
 	};
 };
 
@@ -110,14 +101,6 @@ std::string	Server::kick_utils(std::string command, std::vector<std::string> &te
 	// Removes the colon.
 	if (reason[0] == ':')
 		reason.erase(reason.begin());
-	else { // Or shrinks to the first space.
-		for (size_t i = 0; i < reason.size(); i++) {
-			if (reason[i] == ' ') {
-				reason = reason.substr(0, i);
-				break;
-			};
-		};
-	};
 
 	// Checks if the channels are all valid.
 	for (size_t i = 0; i < temp.size(); i++) {
@@ -125,8 +108,6 @@ std::string	Server::kick_utils(std::string command, std::vector<std::string> &te
 			temp[i].erase(temp[i].begin());
 		else {
 			respond(ERR_NOSUCHCHANNEL(get_client_by_fd(fd)->get_displayname(), temp[i]), fd);
-			//TODO TESTAR O DE CIMA
-			//senderror(403, " :No such channel\r\n", get_client_by_fd(fd)->get_displayname(), temp[i], fd);
 			temp.erase(temp.begin() + i--);
 		};
 	};

@@ -153,15 +153,15 @@ void	Server::join_channel(std::vector<std::pair<std::string, std::string> > &kin
 
 	if (this->channel_list_[j].get_topic_name().empty() == false)
 		respond(RPL_JOIN(get_client_by_fd(fd)->get_hostname(), get_client_by_fd(fd)->get_ip(), kintsugi[i].first) 
-	+ RPL_TOPIC(get_client_by_fd(fd)->get_displayname(), channel_list_[j].get_name(), channel_list_[j].get_topic_name()) 
-	+ RPL_NAMREPLY(get_client_by_fd(fd)->get_displayname(), channel_list_[j].get_name(), channel_list_[j].get_client_list()) 
-	+ RPL_ENDOFNAMES(get_client_by_fd(fd)->get_displayname(), channel_list_[j].get_name()), fd);
+	+ RPL_TOPIC(get_client_by_fd(fd)->get_displayname(), this->channel_list_[j].get_name(), this->channel_list_[j].get_topic_name()) 
+	+ RPL_NAMREPLY(get_client_by_fd(fd)->get_displayname(), this->channel_list_[j].get_name(), this->channel_list_[j].get_client_list()) 
+	+ RPL_ENDOFNAMES(get_client_by_fd(fd)->get_displayname(), this->channel_list_[j].get_name()), fd);
 	else
 		respond(RPL_JOIN(get_client_by_fd(fd)->get_hostname(), get_client_by_fd(fd)->get_ip(), kintsugi[i].first) 
-	+ RPL_NAMREPLY(get_client_by_fd(fd)->get_displayname(), channel_list_[j].get_name(), channel_list_[j].get_client_list()) 
-	+ RPL_ENDOFNAMES(get_client_by_fd(fd)->get_displayname(), channel_list_[j].get_name()), fd);
+	+ RPL_NAMREPLY(get_client_by_fd(fd)->get_displayname(), this->channel_list_[j].get_name(), this->channel_list_[j].get_client_list()) 
+	+ RPL_ENDOFNAMES(get_client_by_fd(fd)->get_displayname(), this->channel_list_[j].get_name()), fd);
 
-	channel_list_[j].relay(RPL_JOIN(get_client_by_fd(fd)->get_hostname(), get_client_by_fd(fd)->get_ip(), kintsugi[i].first), fd);
+	this->channel_list_[j].relay(RPL_JOIN(get_client_by_fd(fd)->get_hostname(), get_client_by_fd(fd)->get_ip(), kintsugi[i].first), fd);
 };
 
 // Scours every channel and tells in how many a client is present.
@@ -198,7 +198,7 @@ void	Server::create_channel(std::vector<std::pair<std::string, std::string> > &k
 	new_channel.set_creation_auto();
 	this->channel_list_.push_back(new_channel);
 
-	respond(RPL_JOIN(get_client_by_fd(fd)->get_hostname(), get_client_by_fd(fd)->get_ip(), kintsugi[i].first) 
-	+ RPL_NAMREPLY(get_client_by_fd(fd)->get_displayname(), channel_list_[i].get_name(), channel_list_[i].get_client_list()) 
-	+ RPL_ENDOFNAMES(get_client_by_fd(fd)->get_displayname(), channel_list_[i].get_name()), fd);
+	respond(RPL_JOIN(get_client_by_fd(fd)->get_hostname(), get_client_by_fd(fd)->get_ip(), new_channel.get_name()) 
+	+ RPL_NAMREPLY(get_client_by_fd(fd)->get_displayname(), new_channel.get_name(), new_channel.get_client_list()) 
+	+ RPL_ENDOFNAMES(get_client_by_fd(fd)->get_displayname(), new_channel.get_name()), fd);
 };

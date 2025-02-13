@@ -574,15 +574,8 @@ std::string	Server::get_message(std::string command) {
 	if (message.empty())
 		return (std::string("QUIT"));
 	// If the reason doesn't start with a colon, adds it to the beginning.
-	if (message[0] != ':') {
-		for (size_t i = 0; i < message.size(); i++) {
-			if (message[i] == ' ') {
-				message.erase(message.begin() + i, message.end());
-				break;
-			};
-		};
+	if (message[0] != ':')
 		message.insert(message.begin(), ':');
-	};
 	return (message);
 };
 

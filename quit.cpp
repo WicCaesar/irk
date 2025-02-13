@@ -16,6 +16,7 @@
 void	Server::quit(std::string command, int fd) {
 	std::string	reason = get_message(command);
 
+	// First treats a case of a member quitting, then an admin.
 	for (size_t i = 0; i < channel_list_.size(); i++) {
 		if (channel_list_[i].get_client_by_fd(fd)) {
 			channel_list_[i].remove_client(fd);

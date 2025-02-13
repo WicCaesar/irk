@@ -35,7 +35,7 @@ int	main(int argc, char** argv)
 		myserver.close_fd();
 		std::cerr << e.what() << std::endl;
 	};
-	std::cout << "Servidor encerrado." << std::endl; //! MANTER MENSAGEM OU NÃO? DEIXAR POR ORA PARA TESTES
+	std::cout << "Servidor encerrado." << std::endl;
 };
 
 // Checks if the port is a number between 1024 and 65535.

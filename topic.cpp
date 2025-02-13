@@ -16,8 +16,6 @@
 void	Server::topic_utils(std::string &command, int &fd) {
 	if (command == "TOPIC ") {
 		respond(ERR_NEEDMOREPARAMS(get_client_by_fd(fd)->get_displayname()), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(461, get_client_by_fd(fd)->get_displayname(), " :Not enough parameters\r\n", fd);
 		return ;
 	};
 
@@ -25,8 +23,6 @@ void	Server::topic_utils(std::string &command, int &fd) {
 
 	if (shards.size() == 1) {
 		respond(ERR_NEEDMOREPARAMS(get_client_by_fd(fd)->get_displayname()), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(461, get_client_by_fd(fd)->get_displayname(), " :Not enough parameters\r\n", fd);
 		return ;
 	};
 
@@ -35,16 +31,12 @@ void	Server::topic_utils(std::string &command, int &fd) {
 	// If the channel doesn't exist, sends error 403.
 	if (!get_channel_by_name(channel)) {
 		respond(ERR_NOSUCHCHANNEL(get_client_by_fd(fd)->get_displayname(), channel), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(403, "#" + channel, fd, " :No such channel\r\n");
 		return ;
 	};
 
 	// If the client isn't on the channel, sends error 442.
 	if (!get_channel_by_name(channel)->get_client_by_fd(fd) && !get_channel_by_name(channel)->get_admin_by_fd(fd)) {
 		respond(ERR_NOTONCHANNEL(get_client_by_fd(fd)->get_displayname(), channel), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(442, "#" + channel, fd, " :You're not on that channel\r\n");
 		return ;
 	};
 
@@ -53,8 +45,6 @@ void	Server::topic_utils(std::string &command, int &fd) {
 		// If not set, sends error 331.
 		if (get_channel_by_name(channel)->get_topic_name() == "") {
 			respond(RPL_NOTOPIC(get_client_by_fd(fd)->get_displayname(), channel), fd);
-			//TODO UM OU OUTRO, TESTAR O DE CIMA
-			//senderror(331, "#" + channel, fd, " :No topic is set\r\n");
 			return ;
 		};
 
@@ -65,8 +55,7 @@ void	Server::topic_utils(std::string &command, int &fd) {
 			respond(RPL_TOPICWHOTIME(get_client_by_fd(fd)->get_displayname(), channel, get_channel_by_name(channel)->get_topic_name()), fd);
 			return ;
 		} else {
-			// If the topic name starts with a space, removes it.
-			//TODO TESTAR COM VÁRIOS ESPAÇOS ANTES.
+			// If the topic name starts with spaces, removes them.
 			size_t position = get_channel_by_name(channel)->get_topic_name().find(" ");
 			if (position == 0)
 				get_channel_by_name(channel)->get_topic_name().erase(0, 1);
@@ -94,23 +83,18 @@ void	Server::topic_utils(std::string &command, int &fd) {
 		// If the topic is nothing other than ":", sends error 331.
 		if (temp[2][0] == ':' && temp[2][1] == '\0') {
 			respond(RPL_NOTOPIC(get_client_by_fd(fd)->get_displayname(), channel), fd);
-			//TODO UM OU OUTRO, TESTAR O DE CIMA
-			//senderror(331, "#" + channel, fd, " :No topic is set\r\n");
 			return ;
 		};
 
 		// If the topic restricted mode is activated and the client isn't an operator, sends error 482.
 		if (get_channel_by_name(channel)->istopic_restricted() && get_channel_by_name(channel)->get_client_by_fd(fd)) {
 			respond(ERR_CHANOPRIVSNEEDED(get_client_by_fd(fd)->get_displayname(), channel), fd);
-			//TODO UM OU OUTRO, TESTAR O DE CIMA
-			//senderror(482, "#" + channel, fd, " :You're not channel operator\r\n");
 			return ; // If it's topic restricted and the client is operator, defines topic.
 		} else if (get_channel_by_name(channel)->istopic_restricted() && get_channel_by_name(channel)->get_admin_by_fd(fd)) {
 			get_channel_by_name(channel)->set_creation_given(get_time());
 			get_channel_by_name(channel)->set_topic_name(temp[2]);
 			std::string	response;
 			size_t		position = temp[2].find(":");
-			//TODO ENTENDER POR QUE ÀS VEZES APARECE : E ÀS  VEZES NÃO. PERGUNTAR AO COPILOT OU CHATGPT.
 			if (position == std::string::npos)
 				response = ":" + get_client_by_fd(fd)->get_displayname() + "!" + get_client_by_fd(fd)->get_login() + "@localhost TOPIC #" + channel + " :" + get_channel_by_name(channel)->get_topic_name() + CRLF;
 			else

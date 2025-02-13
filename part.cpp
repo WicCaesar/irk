@@ -19,8 +19,6 @@ void	Server::part(std::string command, int fd) {
 
 	if (!part_utils(command, temp, reason, fd)) {
 		respond(ERR_NEEDMOREPARAMS(get_client_by_fd(fd)->get_displayname()), fd);
-		//TODO UM OU OUTRO, TESTAR O DE CIMA
-		//senderror(461, " :Not enough parameters\r\n", get_client_by_fd(fd)->get_displayname(), fd);
 		return ;
 	};
 
@@ -34,8 +32,6 @@ void	Server::part(std::string command, int fd) {
 				// If the client is not a member, moves on.
 				if (!this->channel_list_[j].get_client_by_fd(fd) && !this->channel_list_[j].get_admin_by_fd(fd)) {
 					respond(ERR_NOTONCHANNEL(get_client_by_fd(fd)->get_displayname(), this->channel_list_[j].get_name()), fd);
-					//TODO UM OU OUTRO, TESTAR O DE CIMA
-					//senderror(442, ":You're not on that channel\r\n", get_client_by_fd(fd)->get_displayname(), this->channel_list_[j].get_name(), fd);
 					continue;
 				};
 				// Sends parting message to the channel.
@@ -64,8 +60,6 @@ void	Server::part(std::string command, int fd) {
 		// If the channel does not exist, sends error 403.
 		if (flag == false)
 			respond(ERR_NOSUCHCHANNEL(get_client_by_fd(fd)->get_displayname(), temp[i]), fd);
-			//TODO UM OU OUTRO, TESTAR O DE CIMA
-			//senderror(403, " :No such channel\r\n", get_client_by_fd(fd)->get_displayname(), temp[i], fd);
 	};	
 };
 
@@ -116,8 +110,6 @@ bool	Server::part_utils(std::string command, std::vector<std::string> &temp, std
 			temp[i].erase(temp[i].begin());
 		else {
 			respond(ERR_NOSUCHCHANNEL(get_client_by_fd(fd)->get_displayname(), temp[i]), fd);
-			//TODO TESTAR O DE CIMA
-			//senderror(403, " :No such channel\r\n", get_client_by_fd(fd)->get_displayname(), temp[i], fd);
 			temp.erase(temp.begin() + i--);
 		};
 	};
