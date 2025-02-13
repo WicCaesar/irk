@@ -11,7 +11,7 @@ SOURCES = $(addprefix $(SOURCESPATH), $(SOURCESLIST))
 OBJECTS	= $(SOURCES:.cpp=.o)
 
 COMPILE	= c++
-FLAGS	= -Wall -Wextra -Werror -O3 -std=c++98
+FLAGS	= -Wall -Wextra -Werror -ggdb3 -std=c++98
 # Replaced -g with -O3 to optimise the code (removing debug symbols).
 # -O3 is faster than -g and -O2, but it takes longer to compile.
 VALGRIND	= valgrind -s --track-origins=yes --leak-check=full --show-leak-kinds=all

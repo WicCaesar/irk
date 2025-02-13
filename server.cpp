@@ -221,6 +221,7 @@ void	Server::welcome_client(void) {
 	std::cout << "Cliente " << incoming_fd << " conectado." << std::endl;
 };
 
+#include <iostream>
 // Receives new data from a client that is already registered.
 void	Server::welcome_data(int fd) {
 	char buffer[1024];
@@ -237,6 +238,7 @@ void	Server::welcome_data(int fd) {
 		close(fd); 						// and closes the client's socket.
 	} else { // If no problems occurred, prints the received data.
 		client->set_buffer(buffer);
+		std::cout << client->get_buffer() << '\n';
 		// If the client's buffer doesn't contain a newline character, returns.
 		if (client->get_buffer().find_first_of("\r\n") == std::string::npos)
 			return ;
